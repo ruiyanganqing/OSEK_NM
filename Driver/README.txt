@@ -1,0 +1,4 @@
+各个平台的驱动文件独立存放在每个文件夹下面
+要在某个平台使用，就在Driver_Common.h中定义#define xxx，
+比如要在STM32F407下使用，就在Driver_Common.h中定义#define STM32F407.
+各个平台只需要提供定时器和CAN的驱动程序，可以参考stm32f407目录下的文件。

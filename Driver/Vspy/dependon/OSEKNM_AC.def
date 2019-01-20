@@ -1,0 +1,16 @@
+EXPORTS 
+	ICSCoreMiniExtensionInit				@1	 PRIVATE
+	ICSCoreMiniExtensionProcessMs			@2	 PRIVATE
+	ICSCoreMiniExtensionBeforeStarted		@3	 PRIVATE
+	ICSCoreMiniExtensionStarted				@4	 PRIVATE
+	ICSCoreMiniExtensionStopped				@5	 PRIVATE
+	ICSCoreMiniExtensionKeyPress			@6	 PRIVATE
+	ICSCoreMiniExtensionMain				@7	 PRIVATE
+	ICSCoreMiniExtensionErrorFrame			@8	 PRIVATE
+	ICSCoreMiniExtensionErrorState			@9	 PRIVATE
+       ICSCoreMiniExtensionEveryMessage		@10	 PRIVATE
+       ICSCoreMiniAPIVersionCheck				@11	 PRIVATE
+       ICSCoreMiniExtensionProcessGUI			@12	 PRIVATE
+	
+	
+	
