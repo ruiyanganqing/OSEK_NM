@@ -2,9 +2,8 @@
 /*
 * 实现OSEK_NM各个状态下的逻辑
 */
-#include "OsekNM.h"
 //因为OSEKNM在编译时就应该确定在哪个平台使用，所以这里包含平台相关的头文件
-
+#include "OsekNM.h"
 #include "Driver_Common.h"
 #define PRINT  //开启输出功能
 
@@ -49,7 +48,7 @@ static void NMInit()
 #ifdef PRINT
 	printf("NMInit\n");
 #endif
-	/*节点配置初始化,若调用了配置函数，则使用配置的参数，否则使用默认的参数*/
+	/*节点配置初始化*/
 	NodeCfg.networkstatus.NMActive = 1;
 	NodeCfg.Self = ConfigedPara ? ConfPara.NodeAddr : ADDR_SELF;
 	NodeCfg.LogicSuccessor = ConfigedPara ? ConfPara.NodeAddr : ADDR_SELF;
@@ -131,9 +130,7 @@ static void NMReset()
 		TX_CAN_Transmit(&NMMsgTx);
 	  NMTXCount++;
 	}
-	//printf("Active:%x\n", NodeCfg.networkstatus.NMActive);
-	//printf("ID:%x\n", NMMsgTx.MsgID);
-	//printf("DA:%x\n", NMMsgTx.MsgDA);
+
 	if ((NMTXCount <= TXLIMIT) && (NMRXCount <= RXLIMIT))
 	{
 		//设置TTYP定时器
@@ -175,7 +172,6 @@ static void NMLimpHome()
 		//TERROR超时事件发生
 		if (GetTimerIsOut(NM_TIMER_TERROR))
 		{
-			//printf("TERROR OUT\n");
 #ifdef OSEKOS
 			D_Online();
 #endif
@@ -191,11 +187,6 @@ static void NMLimpHome()
 					NMMsgTx.MsgDA = NodeCfg.Self;
 					NMMsgTx.MsgID = NodeCfg.nmpara.NMAddr;
 					NMTxFlag = TX_CAN_Transmit(&NMMsgTx);
-					#ifdef PRINT
-	        printf("NMID:%lx NMDATA:%02x %02x %02x %02x %02x %02x %02x %02x\n",NMMsgTx.MsgID,NMMsgTx.MsgDA
-					,NMMsgTx.MsgCtl,NMMsgTx.MsgData[0],NMMsgTx.MsgData[1],NMMsgTx.MsgData[2],NMMsgTx.MsgData[3],
-					 NMMsgTx.MsgData[4],NMMsgTx.MsgData[5]);
-          #endif
 				}
 				NMCurrentState = NM_LIMPHOME_PREPSLEEP;
 				NMCurrentSubState = NM_LIMPHOME_PREPSLEEP;
@@ -214,13 +205,6 @@ static void NMLimpHome()
 					NMMsgTx.MsgDA = NodeCfg.Self;
 					NMMsgTx.MsgID =NodeCfg.nmpara.NMAddr;
 					NMTxFlag = TX_CAN_Transmit(&NMMsgTx);
-					#ifdef PRINT
-					//printf("TranState:%d\n",NMTxFlag);
-					delay_ms(10);//调试时，使用环回模式，这里延迟10ms
-	        printf("NMID:%lx NMDATA:%02x %02x %02x %02x %02x %02x %02x %02x\n",NMMsgTx.MsgID,NMMsgTx.MsgDA
-					,NMMsgTx.MsgCtl,NMMsgTx.MsgData[0],NMMsgTx.MsgData[1],NMMsgTx.MsgData[2],NMMsgTx.MsgData[3],
-					 NMMsgTx.MsgData[4],NMMsgTx.MsgData[5]);
-          #endif
 				}
 				continue;
 			}
@@ -237,6 +221,9 @@ static void NMLimpHome()
 		//收到任意的NM报文
 		if (GetFromFIFO(&NMMsgRecv))
 		{
+			#ifdef PRINT
+			printf("Id:%lx DA:%x\n", NMMsgRecv.MsgID, NMMsgRecv.MsgDA);
+			#endif
 			if (((NodeCfg.networkstatus.NMActive) && !(NodeCfg.nmmarker.LimpHome) && (!(NMMsgRecv.MsgCtl & NMMSGTYPE_SA))) ||
 				((NodeCfg.networkstatus.NMActive) && (NodeCfg.nmmarker.LimpHome) && (NodeCfg.networkstatus.BusSleep) && (!(NMMsgRecv.MsgCtl & NMMSGTYPE_SA))) ||
 				(!(NodeCfg.networkstatus.NMActive) && (NodeCfg.networkstatus.BusSleep) && (!(NMMsgRecv.MsgCtl & NMMSGTYPE_SA))) ||
@@ -249,6 +236,7 @@ static void NMLimpHome()
 				NMCurrentSubState = NM_INIT_RESET;
 				NMPreState = NM_LIMPHOME;
 				break;
+
 			}
 			else if ((!(NodeCfg.networkstatus.NMActive) && (NodeCfg.networkstatus.BusSleep) && (NMMsgRecv.MsgCtl & NMMSGTYPE_SA)) ||
 				((NodeCfg.networkstatus.NMActive) && (NodeCfg.nmmarker.LimpHome) && (NodeCfg.networkstatus.BusSleep) && (NMMsgRecv.MsgCtl & NMMSGTYPE_SA)) ||
@@ -386,7 +374,7 @@ static void NMTwbsLimpHome()
 *参数：Node 节点地址
 *返回值:节点在LimpHome中的位置 -1:错误
 */
-static NMTypeU8_t FineLimpHomeNode(NMTypeU8_t Node)
+static char FineLimpHomeNode(NMTypeU8_t Node)
 {
 	//遍历整个LimpHome数组
 	NMTypeU8_t i;
@@ -408,7 +396,7 @@ static NMTypeU8_t FineLimpHomeNode(NMTypeU8_t Node)
 *参数：Node 节点地址
 *返回值:节点在Present中的位置,-1 失败
 */
-static NMTypeU8_t FinePresentNode(NMTypeU8_t Node)
+static char FinePresentNode(NMTypeU8_t Node)
 {
 	//遍历整个Present数组
 	NMTypeU8_t i;
@@ -545,8 +533,8 @@ static void NMNormal()
 {
 	NMPDU_t NMMsgRecv;
 	NMPDU_t NMMsgTx;
-	NMTypeU8_t NMTxTTYPFlag = 0;//TTYP超时后发送报文标志
-	NMTypeU8_t NMTxRecvFlag = 0;//收到了NM报文后，DUT被跳过后发送报文标志(其实就是Alive报文发送标志)
+	NMTypeU8_t NMTxTTYPFlag = 0;
+	NMTypeU8_t NMTxRecvFlag = 0;
 #ifdef PRINT
 	printf("NMNormal\n");
 #endif
@@ -557,7 +545,9 @@ static void NMNormal()
 		{
 			NMTXCount = 0;
 			NormalStandardNM(&NMMsgRecv, &NMTxRecvFlag);
-			//printf("Id:%x DA:%x\n", NMMsgRecv.MsgID, NMMsgRecv.MsgDA);
+			#ifdef PRINT
+			printf("Id:%lx DA:%x\n", NMMsgRecv.MsgID, NMMsgRecv.MsgDA);
+			#endif
 			if (NMMsgRecv.MsgCtl & NMMSGTYPE_SA)
 			{
 				if (NodeCfg.networkstatus.BusSleep)
@@ -575,7 +565,6 @@ static void NMNormal()
 					break;
 				}
 				else{
-
 					continue;
 				}
 			}
@@ -657,7 +646,7 @@ static void NMNormal()
 				break;
 			}
 		}
-		//发送了NM报文(ALive报文或TTYP超时报文)
+		//发送了NM报文
 		if (NMTxTTYPFlag || NMTxRecvFlag)
 		{
 			NMTxTTYPFlag = 0;
@@ -869,12 +858,7 @@ static void NMBusSleep()
 #ifdef PRINT
 	printf("NMBusSleep\n");
 #endif
- /*进入低功耗模式*/
-	CAN_InitTypeDef CAN_InitStructure;
-	CAN_InitStructure.CAN_Mode = CAN_OperatingMode_Sleep;
-	CAN_Init(CAN1, &CAN_InitStructure);  // 初始化CAN1
-	/*关闭定时器3*/
-	Stm32Timer3ShutDown();
+
 	while (1)
 	{
 		//GotoMode(Awake)被调用
@@ -936,8 +920,7 @@ void NMStateManage()
 		case NM_BUSSLEEP:
 			NMBusSleep();
 			break;
-		}
-		  
+		}		  
 	}
 }
 

@@ -21,6 +21,11 @@ extern int TidTimer;
 *返回值：E_OK 无错
 *说明：开启网络管理，网络状态从NMOFF转移到NMON
 */
+/*函数名：StartNM
+*参数：通信网络的地址
+*返回值：E_OK 无错
+*说明：开启网络管理，网络状态从NMOFF转移到NMON
+*/
 StatusType_t StartNM()
 {
 	/*NM状态从NMOFF到NMON*/
