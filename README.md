@@ -2,9 +2,9 @@
 基于OsekNM 2.5.3协议实现的OsekNM，跨平台的结构，目前只实现了STM32F407ZGT6平台的驱动。
 
 # 1. 目录结构
-1.1 App目录是一个keil5工程，App/keil/Objects/OsekNM.hex是一个可以直接在STM32F407ZGT6平台运    行的hex文件。
-1.2 Driver目录包含了stm32f407子目录和Win7子目录，stm32f407目录下就是实现的STM32F407ZGT6平台的底层驱动，包括定时器和CAN模块的驱动，以及Stm32标准库的东西；Win7子目录是在windows7平台下执行的一些文件；Driver_Common.c是一些公用的驱动，由OsekNM_core统一调用。
-1.3 OsekNM_core实现了OsekNM 2.5.3协议的核心逻辑，OsekNM.c实现了对各个节点各状态的处理，OsekNMServer.c实现了OsekNM 2.5.3协议提供给应用程序的API。
+1.1 App目录是一个keil5工程，App/keil/Objects/OsekNM.hex是一个可以直接在STM32F407ZGT6平台运    行的hex文件。<br />
+1.2 Driver目录包含了stm32f407子目录和Win7子目录，stm32f407目录下就是实现的STM32F407ZGT6平台的底层驱动，包括定时器和CAN模块的驱动，以及Stm32标准库的东西；Win7子目录是在windows7平台下执行的一些文件；Driver_Common.c是一些公用的驱动，由OsekNM_core统一调用。<br />
+1.3 OsekNM_core实现了OsekNM 2.5.3协议的核心逻辑，OsekNM.c实现了对各个节点各状态的处理，OsekNMServer.c实现了OsekNM 2.5.3协议提供给应用程序的API。<br />
 
 # 2. 移植
 2.1 在Driver目录新建文件夹，保存新平台的驱动程序，新的平台下需要实现CAN模块和定时器及中断的驱动程序。
