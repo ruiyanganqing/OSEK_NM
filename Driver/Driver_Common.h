@@ -2,8 +2,9 @@
 #ifndef CONFIGH_H
 #define CONFIGH_H
 
-#define STM32F407  //不在STM32F407平台就将其注释掉
 #include "OsekNM.h"
+
+#define STM32F407  //不在STM32F407平台就将其注释掉
 #ifdef STM32F407
 #include "CAN.h"
 #include "Timer.h"
@@ -15,7 +16,7 @@
 typedef  int TimerOutFlag_t;
 
 //网络管理报文的ID
-#define NMID (0x18ffA019)
+#define NMID (0x0cffA019)
 
 //设置默认节点源地址,节点地址不能为0
 #define ADDR_SELF 0x19
@@ -33,13 +34,9 @@ typedef  int TimerOutFlag_t;
 //返回值定义
 #define E_OK     0
 #define E_ERROR -1
+
 //平台相关的定义
 //#define OSEKOS //需要使用OSEKOS
-#define STM32F407 //STM32F407平台
-struct GenericMessage{
-    char btData[8];
-	  int  iID;
-};
 
 //#define PRINT
 char SetToFIFO(NMPDU_t* msg);

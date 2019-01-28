@@ -121,8 +121,8 @@ char GetFromFIFO(NMPDU_t* msg)
 	if (RecvFIFO.EmptyFlag == 1)//先判断缓冲区空否
 		return 0;
 	/*从缓冲区取出报文*/
-	msg->MsgDA = RecvFIFO.MSGs[RecvFIFO.Head% FIFOMAX].MsgData[0];
-	msg->MsgCtl = RecvFIFO.MSGs[RecvFIFO.Head% FIFOMAX].MsgData[1];
+	msg->MsgDA = RecvFIFO.MSGs[RecvFIFO.Head% FIFOMAX].MsgDA;
+	msg->MsgCtl = RecvFIFO.MSGs[RecvFIFO.Head% FIFOMAX].MsgCtl;
 	msg->MsgID = RecvFIFO.MSGs[RecvFIFO.Head% FIFOMAX].MsgID;
 	//数据域直接复制
 	for (; i < OSEKNM_DLC; i++)
