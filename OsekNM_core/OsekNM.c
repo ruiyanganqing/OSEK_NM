@@ -108,11 +108,11 @@ static void NMReset()
 	}
 	/*单纯的NMReset的任务*/
 	/*1.重置系统默认配置
-	*重置逻辑后继和present为自身
+	*重置逻辑后继和present
 	*/
 	for (; i < NM_PRESENTNUM; i++)
 	{
-		NodeCfg.config.Present[i] = NodeCfg.Self;
+		NodeCfg.config.Present[i] = 0;
 	}
 	NodeCfg.LogicSuccessor = NodeCfg.Self;
 
@@ -374,7 +374,7 @@ static void NMTwbsLimpHome()
 *参数：Node 节点地址
 *返回值:节点在LimpHome中的位置 -1:错误
 */
-static char FineLimpHomeNode(NMTypeU8_t Node)
+static char FindLimpHomeNode(NMTypeU8_t Node)
 {
 	//遍历整个LimpHome数组
 	NMTypeU8_t i;
@@ -396,7 +396,7 @@ static char FineLimpHomeNode(NMTypeU8_t Node)
 *参数：Node 节点地址
 *返回值:节点在Present中的位置,-1 失败
 */
-static char FinePresentNode(NMTypeU8_t Node)
+static char FindPresentNode(NMTypeU8_t Node)
 {
 	//遍历整个Present数组
 	NMTypeU8_t i;
@@ -457,8 +457,9 @@ static void NormalStandardNM(NMPDU_t* NMMsg,NMTypeU8_t* NMTxFlag)
 		//添加在线配置
 		//取出源地址到NodeCfg.config.Present
 		SA = (NMMsg->MsgID & 0xff);
-		Index = FinePresentNode(SA);
-		NodeCfg.config.Present[Index] = SA;
+		Index = FindPresentNode(SA);
+		if(Index>0)
+		  NodeCfg.config.Present[Index] = SA;
 		//确定逻辑后继
 		EnsureLogicSuccessor(NMMsg);
 		//Alive报文，更新逻辑环为不稳定
@@ -515,8 +516,9 @@ static void NormalStandardNM(NMPDU_t* NMMsg,NMTypeU8_t* NMTxFlag)
 		//添加LimpHome配置
 		//取出源地址到NodeCfg.config.LimpHome
 		SA = (NMMsg->MsgID & 0xff);
-		Index = FineLimpHomeNode(SA);
-		NodeCfg.config.LimpHome[Index] = SA;
+		Index = FindLimpHomeNode(SA);
+		if(Index>0)
+		   NodeCfg.config.LimpHome[Index] = SA;
 	}
 }
 
