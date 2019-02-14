@@ -28,6 +28,14 @@ extern NMStateType_t NMCurrentSubState;
 //节点上一个状态
 extern NMStateType_t  NMPreState;
 extern NMNodeCfg_t NodeCfg;
+//DEBUG
+//#define DRVCOM_DEBUG
+#ifdef DRVCOM_DEBUG
+#define DRVCOM_PRINT(...) printf(__VA_ARGS__)
+#else 
+#define DRVCOM_PRINT(...)
+#endif
+
 /*函数名：TX_CAN_Transmit
 *参数：NMPDU
 *返回值：成功 1
@@ -196,7 +204,6 @@ static void TimerOutTWBS()
 //10ms定时器
 void Timer10()
 {
-	//printf("10ms\n");
 	/*调用SetAlarm(xx)，定时器开始递增*/
 	if (SetAlarm_TTYP)
 	{
@@ -228,7 +235,6 @@ void Timer10()
 	if (SetAlarm_TERROR)
 	{
 		TERROR_Count++;
-		//printf("TERROR_Count:%d\n",TERROR_Count);
 		if (TERROR_Count >= 100)//TError=1000ms
 		{
 			TERROR_Count = 0;//重新计数
@@ -252,7 +258,6 @@ void Timer10()
 	else {
 		TWBS_Count = 0;
 	}
-	/*判断是否超时*/
 }
 
 //平台相关的初始化
@@ -347,7 +352,6 @@ void Recv_EveryMessage(NMPDU_t* p_Msg)
 	if (((p_Msg->MsgID) != NMID) && ((p_Msg->MsgID>>8) == (NMID>>8)))//过滤网络报文，不接收自己发出去的
 	{
 		RecvFIFO.SetMsg(p_Msg);//暂时不处理返回值
-		//printf("on msg :%d\n",i);	
 	}
 }
 

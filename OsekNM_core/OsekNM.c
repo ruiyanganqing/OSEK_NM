@@ -5,7 +5,14 @@
 //因为OSEKNM在编译时就应该确定在哪个平台使用，所以这里包含平台相关的头文件
 #include "OsekNM.h"
 #include "Driver_Common.h"
-#define PRINT  //开启输出功能
+
+//DEBUG
+#define OSEKNM_DEBUG
+#ifdef OSEKNM_DEBUG
+#define OSEKNM_PRINT(...) printf(__VA_ARGS__)
+#else 
+#define OSEKNM_PRINT(...)
+#endif
 
 //节点当前状态
 NMStateType_t NMCurrentState = NM_OFF;
@@ -45,9 +52,7 @@ ConfPara_t ConfPara;
 static void NMInit()
 {
 	NMTypeU8_t i = 0;
-#ifdef PRINT
-	printf("NMInit\n");
-#endif
+	OSEKNM_PRINT("NMInit\n");
 	/*节点配置初始化*/
 	NodeCfg.networkstatus.NMActive = 1;
 	NodeCfg.Self = ConfigedPara ? ConfPara.NodeAddr : ADDR_SELF;
@@ -93,9 +98,7 @@ static void NMReset()
 	NMTypeU8_t i = 0;
 	NMPDU_t NMMsgTx;
 	NMTypeU8_t NMTxFlag = 0;//作为报文发送标志
-#ifdef PRINT
-	printf("NMReset\n");
-#endif
+	OSEKNM_PRINT("NMReset\n");
 	/*NMInitReset子状态的任务*/
 	if (NMCurrentSubState == NM_INIT_RESET)
 	{    
@@ -164,9 +167,7 @@ static void NMLimpHome()
 	NMPDU_t NMMsgRecv;
 	NMPDU_t NMMsgTx;
 	NMTypeU8_t NMTxFlag = 0;//作为报文发送标志
-#ifdef PRINT
-	printf("NMLimpHome\n");
-#endif
+	OSEKNM_PRINT("NMLimpHome\n");
 	while (1)
 	{
 		//TERROR超时事件发生
@@ -175,6 +176,7 @@ static void NMLimpHome()
 #ifdef OSEKOS
 			D_Online();
 #endif
+			OSEKNM_PRINT("NMLimpHome\n");
 			ClcTimerOutFlag(NM_TIMER_TERROR);//清超时标志
 			//满足睡眠条件
 			if (NodeCfg.networkstatus.BusSleep){
@@ -221,9 +223,7 @@ static void NMLimpHome()
 		//收到任意的NM报文
 		if (GetFromFIFO(&NMMsgRecv))
 		{
-			#ifdef PRINT
-			printf("Id:%lx DA:%x\n", NMMsgRecv.MsgID, NMMsgRecv.MsgDA);
-			#endif
+			OSEKNM_PRINT("Id:%lx DA:%x\n", NMMsgRecv.MsgID, NMMsgRecv.MsgDA);
 			if (((NodeCfg.networkstatus.NMActive) && !(NodeCfg.nmmarker.LimpHome) && (!(NMMsgRecv.MsgCtl & NMMSGTYPE_SA))) ||
 				((NodeCfg.networkstatus.NMActive) && (NodeCfg.nmmarker.LimpHome) && (NodeCfg.networkstatus.BusSleep) && (!(NMMsgRecv.MsgCtl & NMMSGTYPE_SA))) ||
 				(!(NodeCfg.networkstatus.NMActive) && (NodeCfg.networkstatus.BusSleep) && (!(NMMsgRecv.MsgCtl & NMMSGTYPE_SA))) ||
@@ -264,9 +264,7 @@ static void NMLimpHome()
 static void NMLimpHomePrepSleep()
 {
 	NMPDU_t NMMsgRecv;
-#ifdef PRINT
-	printf("NMLimpHomePrepSleep\n");
-#endif
+	OSEKNM_PRINT("NMLimpHomePrepSleep\n");
 	while (1)
 	{
 		//GotoMode(Awake)被调用
@@ -321,9 +319,7 @@ static void NMLimpHomePrepSleep()
 static void NMTwbsLimpHome()
 {
 	NMPDU_t NMMsgRecv;
-#ifdef PRINT
-	printf("NMTwbsLimpHome\n");
-#endif
+	OSEKNM_PRINT("NMTwbsLimpHome\n");
 	while (1)
 	{
 		//GotoMode(Awake)被调用
@@ -537,9 +533,7 @@ static void NMNormal()
 	NMPDU_t NMMsgTx;
 	NMTypeU8_t NMTxTTYPFlag = 0;
 	NMTypeU8_t NMTxRecvFlag = 0;
-#ifdef PRINT
-	printf("NMNormal\n");
-#endif
+	OSEKNM_PRINT("NMNormal\n");
 	while (1)
 	{
 		//收到了NM报文
@@ -547,9 +541,7 @@ static void NMNormal()
 		{
 			NMTXCount = 0;
 			NormalStandardNM(&NMMsgRecv, &NMTxRecvFlag);
-			#ifdef PRINT
-			printf("Id:%lx DA:%x\n", NMMsgRecv.MsgID, NMMsgRecv.MsgDA);
-			#endif
+			OSEKNM_PRINT("Id:%lx DA:%x\n", NMMsgRecv.MsgID, NMMsgRecv.MsgDA);
 			if (NMMsgRecv.MsgCtl & NMMSGTYPE_SA)
 			{
 				if (NodeCfg.networkstatus.BusSleep)
@@ -697,9 +689,7 @@ static void NMNormalPrepSleep()
 	NMPDU_t NMMsgTx;
 	NMTypeU8_t NMTxTTYPFlag = 0;
 	NMTypeU8_t NMTxRecvFlag = 0;
-#ifdef PRINT
-	printf("NMPrepareBusSleep\n");
-#endif
+	OSEKNM_PRINT("NMPrepareBusSleep\n");
 	while (1)
 	{
 		//收到了NM报文
@@ -803,9 +793,7 @@ static void NMTwbsNormal()
 {
 	NMPDU_t NMMsgRecv;
 	NMTypeU8_t NMTxFlag = 0;
-#ifdef PRINT
-	printf("NMTwbsNormal\n");
-#endif
+	OSEKNM_PRINT("NMTwbsNormal\n");
 	while (1)
 	{
 		//TWBS超时
@@ -857,10 +845,7 @@ static void NMTwbsNormal()
 static void NMBusSleep()
 {
 	NMPDU_t NMMsg;
-#ifdef PRINT
-	printf("NMBusSleep\n");
-#endif
-
+	OSEKNM_PRINT("NMBusSleep\n");
 	while (1)
 	{
 		//GotoMode(Awake)被调用
